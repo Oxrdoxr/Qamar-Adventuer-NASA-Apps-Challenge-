@@ -11,9 +11,10 @@ const SolarWindGame = () => {
   const [highScore, setHighScore] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
+  const [showInfoPopup, setShowInfoPopup] = useState(false);
   const gameContainerRef = useRef(null);
 
-  // تحميل أعلى نقاط من localStorage
+  // تحميل أعلى نقاط
   useEffect(() => {
     const savedHighScore = localStorage.getItem('solarWindHighScore');
     if (savedHighScore) {
@@ -29,7 +30,7 @@ const SolarWindGame = () => {
     }
   }, [score, highScore]);
 
-  // إنشاء جسيمات رياح شمسية
+  // إنشاء جسيمات
   const createParticle = () => {
     if (!gameStarted || gameOver) return;
 
@@ -40,7 +41,7 @@ const SolarWindGame = () => {
       id: Math.random(),
       left: Math.random() * 80 + 10,
       type: type,
-      top: 0,
+      top: -10,
       speed: Math.random() * 2 + 1,
     };
     
@@ -54,6 +55,7 @@ const SolarWindGame = () => {
     setEarthHealth(100);
     setScore(0);
     setParticles([]);
+    setShowInfoPopup(false);
   };
 
   // إعادة البدء
@@ -61,82 +63,70 @@ const SolarWindGame = () => {
     startGame();
   };
 
-  // تأثير اختفاء ديناميكي للجسيم
-  const animateParticleRemoval = (particleId, particleType) => {
-    // إضافة تأثير قبل الإزالة
-    const particleElement = document.querySelector(`[data-particle-id="${particleId}"]`);
-    if (particleElement) {
-      if (particleType === 'dangerous') {
-        particleElement.style.animation = 'successPop 0.5s forwards';
-        createFloatingText('+10', particleElement, '#4CAF50');
-      } else {
-        particleElement.style.animation = 'errorShrink 0.5s forwards';
-        createFloatingText('-5', particleElement, '#ff4444');
-      }
-      
-      // إزالة الجسيم بعد الانتهاء من التأثير
-      setTimeout(() => {
-        setParticles(prev => prev.filter(p => p.id !== particleId));
-      }, 400);
-    }
-  };
-
-  // إنشاء نص عائم للتأثير
-  const createFloatingText = (text, element, color) => {
-    const rect = element.getBoundingClientRect();
-    const floatingText = document.createElement('div');
-    floatingText.textContent = text;
-    floatingText.style.cssText = `
-      position: fixed;
-      top: ${rect.top}px;
-      left: ${rect.left + rect.width / 2}px;
-      color: ${color};
-      font-size: 1.5rem;
-      font-weight: bold;
-      pointer-events: none;
-      z-index: 1000;
-      animation: floatUp 1s forwards;
-    `;
-    document.body.appendChild(floatingText);
-    
-    setTimeout(() => {
-      floatingText.remove();
-    }, 1000);
-  };
-
   // النقر على الجسيمات
   const handleParticleClick = (particleId, particleType, e) => {
     e.stopPropagation();
     
     if (particleType === 'dangerous') {
-      // نقر صحيح على جسيم خطير
       setScore(prev => prev + 10);
-      animateParticleRemoval(particleId, particleType);
     } else {
-      // نقر خاطئ على جسيم آمن
       setScore(prev => Math.max(0, prev - 5));
-      animateParticleRemoval(particleId, particleType);
     }
+    
+    setParticles(prev => prev.filter(p => p.id !== particleId));
   };
 
-  // تحديث حركة الجسيمات
+  // حركة الجسيمات وتأثيرها على الأرض
   useEffect(() => {
     if (!gameStarted || gameOver) return;
 
     const gameLoop = setInterval(() => {
-      setParticles(prev => 
-        prev.map(particle => ({
+      setParticles(prev => {
+        let healthDamage = 0;
+        const particlesToRemove = [];
+        
+        const updatedParticles = prev.map(particle => ({
           ...particle,
-          top: particle.top + particle.speed
-        })).filter(particle => {
-          // إذا وصل أي جسيم إلى الأرض - إزالته بدون تأثير
-          if (particle.top > 85) {
-            return false;
+          top: particle.top + particle.speed * 0.8
+        }));
+
+        // التحقق من الجسيمات التي وصلت إلى الأرض
+        updatedParticles.forEach(particle => {
+          if (particle.top > 75 && particle.type === 'dangerous') {
+            healthDamage += 15;
+            particlesToRemove.push(particle.id);
           }
-          return true;
-        })
-      );
-    }, 50);
+          
+          if (particle.top > 80 && particle.type === 'normal') {
+            particlesToRemove.push(particle.id);
+          }
+        });
+
+        // تطبيق الضرر على الأرض
+        if (healthDamage > 0) {
+          setEarthHealth(current => {
+            const newHealth = Math.max(0, current - healthDamage);
+            
+            if (newHealth <= 0) {
+              setGameOver(true);
+            }
+            return newHealth;
+          });
+
+          // تأثير اهتزاز
+          const gameElement = document.querySelector('.solar-wind-game');
+          gameElement.classList.add('damage-effect');
+          setTimeout(() => {
+            gameElement.classList.remove('damage-effect');
+          }, 300);
+        }
+
+        // إزالة الجسيمات
+        return updatedParticles.filter(particle => 
+          particle.top < 90 && !particlesToRemove.includes(particle.id)
+        );
+      });
+    }, 100);
 
     return () => clearInterval(gameLoop);
   }, [gameStarted, gameOver]);
@@ -145,31 +135,109 @@ const SolarWindGame = () => {
   useEffect(() => {
     if (!gameStarted || gameOver) return;
 
-    const particleInterval = setInterval(createParticle, 800);
+    const particleInterval = setInterval(createParticle, 1200);
     return () => clearInterval(particleInterval);
   }, [gameStarted, gameOver]);
 
+  // تأثيرات الصحة المنخفضة
+  useEffect(() => {
+    const earthElement = document.querySelector('.earth');
+    if (earthElement) {
+      if (earthHealth < 30) {
+        earthElement.classList.add('danger');
+      } else {
+        earthElement.classList.remove('danger');
+      }
+    }
+  }, [earthHealth]);
+
   return (
     <div className="solar-wind-game" ref={gameContainerRef}>
+      {/* زر فتح الـ Popup */}
+      <button 
+        className="info-toggle-btn"
+        onClick={() => setShowInfoPopup(true)}
+        title="معلومات عن اللعبة"
+      >
+        ℹ️ معلومات
+      </button>
+
+      {/* Popup Window للمعلومات */}
+      {showInfoPopup && (
+        <>
+          <div 
+            className="info-popup-overlay"
+            onClick={() => setShowInfoPopup(false)}
+          ></div>
+          <div className="info-popup-container">
+            <div className="info-popup">
+              <button 
+                className="popup-close-btn"
+                onClick={() => setShowInfoPopup(false)}
+              >
+                ✕
+              </button>
+              
+              <div className="popup-header">
+                <h3>🌞 الرياح الشمسية</h3>
+              </div>
+              
+              <div className="popup-content">
+                <p>
+                  الرياح الشمسية هي تدفق مستمر للجسيمات المشحونة من الشمس 
+                  إلى الفضاء. هذه الجسيمات يمكن أن تؤثر على:
+                </p>
+                
+                <ul>
+                  <li>✅ الأقمار الصناعية والاتصالات</li>
+                  <li>✅ شبكات الكهرباء والطاقة</li>
+                  <li>✅ رواد الفضاء والمعدات الفضائية</li>
+                  <li>✅ أنظمة الملاحة والGPS</li>
+                </ul>
+
+                <div className="popup-particle-info">
+                  <div className="popup-info-item dangerous">
+                    <span>⚡</span>
+                    <div>
+                      <strong>جسيمات خطرة</strong>
+                      <br/>
+                      <small>+10 نقاط عند النقر</small>
+                      <br/>
+                      <small>-15 صحة إذا وصلت الأرض</small>
+                    </div>
+                  </div>
+                  <div className="popup-info-item safe">
+                    <span>✨</span> 
+                    <div>
+                      <strong>جسيمات آمنة</strong>
+                      <br/>
+                      <small>-5 نقاط عند النقر</small>
+                      <br/>
+                      <small>لا ضرر إذا وصلت الأرض</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
       {/* الخلفية الكونية */}
       <div className="space-background">
         <div className="sun" title="الشمس - مصدر الرياح الشمسية">☀️</div>
-        <div className="earth" title="الأرض - تحتاج لحمايتك!">🌍</div>
+        <div className={`earth ${earthHealth < 30 ? 'danger' : ''}`} title="الأرض - تحتاج لحمايتك!">🌍</div>
         
         {/* الجسيمات */}
         {particles.map(particle => (
           <div
             key={particle.id}
-            data-particle-id={particle.id}
             className={`particle ${particle.type}`}
             style={{
               left: `${particle.left}%`,
               top: `${particle.top}%`
             }}
             onClick={(e) => handleParticleClick(particle.id, particle.type, e)}
-            title={particle.type === 'dangerous' ? 
-              '⚡ جسيم خطير - انقري عليه لتحصلي على +10 نقاط!' : 
-              '✨ جسيم آمن - لا تنقري عليه أو ستخسرين -5 نقاط!'}
           >
             {particle.type === 'dangerous' ? '⚡' : '✨'}
           </div>
@@ -208,7 +276,8 @@ const SolarWindGame = () => {
               <p>🎯 <strong>قواعد اللعبة:</strong></p>
               <p>⚡ <strong>الجسيمات الحمراء:</strong> انقري عليها لتحصلي على +10 نقاط</p>
               <p>✨ <strong>الجسيمات الصفراء:</strong> لا تنقري عليها أو ستخسرين -5 نقاط</p>
-              <p>🏆 <strong>الهدف:</strong> تحقيق أعلى نقاط ممكنة!</p>
+              <p>💥 <strong>إذا وصلت الجسيمات الحمراء للأرض:</strong> -15 صحة</p>
+              <p>🏆 <strong>الهدف:</strong> تحقيق أعلى نقاط قبل تدمير الأرض!</p>
             </div>
             <button className="start-button" onClick={startGame}>
               🚀 ابدأ المهمة
@@ -219,53 +288,35 @@ const SolarWindGame = () => {
             ⚡ انقري على الجسيمات <span style={{color: '#ff4444'}}>الحمراء</span> فقط!
             <br/>
             ✨ ابتعدي عن الجسيمات <span style={{color: '#ffd700'}}>الصفراء</span>
+            {earthHealth < 50 && (
+              <div style={{color: '#ff4444', marginTop: '0.5rem', fontWeight: 'bold'}}>
+                ⚠️ تحذير: صحة الأرض منخفضة!
+              </div>
+            )}
           </div>
         )}
 
+        {/* شاشة Game Over Popup */}
         {gameOver && (
-          <div className="game-over">
-            <h2>🎮 انتهت اللعبة!</h2>
-            <div className="final-stats">
-              <p>النقاط النهائية: <strong>{score}</strong> ⭐</p>
-              <p>أعلى نقاط: <strong>{highScore}</strong> 🏆</p>
-              {score === highScore && score > 0 && (
-                <p className="new-record">🎉 سجل جديد! أحسنت!</p>
-              )}
-            </div>
-            <div className="game-over-buttons">
-              <button onClick={restartGame}>🔄 حاولي مرة أخرى</button>
-              <button onClick={() => navigate('/')}>🏠 العودة للقائمة</button>
+          <div className="game-over-overlay">
+            <div className="game-over-container">
+              <h2 className="game-over-title">💥 انتهت اللعبة!</h2>
+              
+              <div className="final-stats-compact">
+                <p>النقاط النهائية: <strong>{score}</strong> ⭐</p>
+                <p>أعلى نقاط: <strong>{highScore}</strong> 🏆</p>
+                {score === highScore && score > 0 && (
+                  <p className="new-record-compact">🎉 سجل جديد! أحسنت!</p>
+                )}
+              </div>
+              
+              <div className="game-over-buttons-compact">
+                <button onClick={restartGame}>🔄 حاولي مرة أخرى</button>
+                <button onClick={() => navigate('/')}>🏠 القائمة الرئيسية</button>
+              </div>
             </div>
           </div>
         )}
-      </div>
-
-      {/* معلومات تعليمية */}
-      <div className="educational-info">
-        <h3>🌞 الرياح الشمسية</h3>
-        <div className="info-content">
-          <p>
-            الرياح الشمسية هي تدفق للجسيمات المشحونة من الشمس. 
-          </p>
-        </div>
-        <div className="particle-info">
-          <div className="info-item dangerous">
-            <span>⚡</span>
-            <div>
-              <strong>جسيمات خطرة</strong>
-              <br/>
-              <small>+10 نقاط</small>
-            </div>
-          </div>
-          <div className="info-item safe">
-            <span>✨</span> 
-            <div>
-              <strong>جسيمات آمنة</strong>
-              <br/>
-              <small>-5 نقاط</small>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
