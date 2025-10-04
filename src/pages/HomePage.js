@@ -60,20 +60,47 @@ function HomePage() {
         </div>
 
         {/* معلومات سريعة */}
-        <div className="quick-info">
-          <div className="info-card">
-            <span>🌌</span>
-            <p>تعلمي عن الرياح الشمسية</p>
-          </div>
-          <div className="info-card">
-            <span>⚡</span>
-            <p>اكتشفي العواصف المغناطيسية</p>
-          </div>
-          <div className="info-card">
-            <span>🛰️</span>
-            <p>احمي الأقمار الصناعية</p>
-          </div>
-        </div>
+        {/* بطاقات سريعة قابلة للنقر */}
+<div className="quick-info">
+  <button
+    type="button"
+    className="info-card"
+    onClick={() => navigate('/solar-wind')}
+    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { navigate('/solar-wind'); } }}
+    tabIndex={0}
+    aria-label="تعلمي عن الرياح الشمسية"
+  >
+    <span>🌌</span>
+    <p>تعلمي عن الرياح الشمسية</p>
+    <div className="card-hint">انقري للعب</div>
+  </button>
+  
+  <button
+    type="button"
+    className="info-card"
+    onClick={() => navigate('/satellite-protection')}
+    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { navigate('/satellite-protection'); } }}
+    tabIndex={0}
+    aria-label="احمي الأقمار الصناعية"
+  >
+    <span>🛰️</span>
+    <p>احمي الأقمار الصناعية</p>
+    <div className="card-hint">انقري للاستكشاف</div>
+  </button>
+  
+  <button
+    type="button"
+    className="info-card"
+    onClick={() => navigate('/aurora')}
+    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { navigate('/aurora'); } }}
+    tabIndex={0}
+    aria-label="اكتشفي الشفق القطبي"
+  >
+    <span>💫</span>
+    <p>اكتشفي الشفق القطبي</p>
+    <div className="card-hint">انقري للمعرفة</div>
+  </button>
+</div>
       </div>
     </div>
   );
