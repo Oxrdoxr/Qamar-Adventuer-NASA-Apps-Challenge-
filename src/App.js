@@ -2,9 +2,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
-import HomePage from './pages/HomePage';
-import SolarWindGame from './pages/SolarWindGame';
-import AuroraGame from './pages/AuroraGame';
+import HomePage from './pages/HomePage.jsx';
+import SolarWindGame from './pages/SolarWindGame.jsx';
+import AuroraGame from './pages/AuroraGame.jsx';
 
 function App() {
   return (

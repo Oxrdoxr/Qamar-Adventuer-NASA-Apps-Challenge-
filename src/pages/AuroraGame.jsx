@@ -1,7 +1,7 @@
 // src/pages/AuroraGame.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import './AuroraGame.css'; // إذا كان لديك ملف CSS منفصل
+import '../styles/AuroraGame.css'; // إذا كان لديك ملف CSS منفصل
 
 function AuroraGame() {
   const navigate = useNavigate();

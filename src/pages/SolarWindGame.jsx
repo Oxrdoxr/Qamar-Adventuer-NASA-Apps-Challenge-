@@ -1,7 +1,7 @@
 // src/pages/SolarWindGame.js
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './SolarWindGame.css';
+import '../styles/SolarWindGame.css';
 
 const SolarWindGame = () => {
   const navigate = useNavigate();
@@ -157,76 +157,81 @@ const SolarWindGame = () => {
       <button 
         className="info-toggle-btn"
         onClick={() => setShowInfoPopup(true)}
-        title="معلومات عن اللعبة"
+        title="Game Information"
       >
-        ℹ️ معلومات
+        ℹ️ Information
       </button>
 
-      {/* Popup Window للمعلومات */}
+      {/* Popup Window الجديد */}
       {showInfoPopup && (
-        <>
-          <div 
-            className="info-popup-overlay"
-            onClick={() => setShowInfoPopup(false)}
-          ></div>
-          <div className="info-popup-container">
-            <div className="info-popup">
-              <button 
-                className="popup-close-btn"
-                onClick={() => setShowInfoPopup(false)}
-              >
-                ✕
-              </button>
+        <div className="info-popup-backdrop" onClick={() => setShowInfoPopup(false)}>
+          <div className="info-popup-content" onClick={(e) => e.stopPropagation()}>
+            <button 
+              className="popup-close-btn"
+              onClick={() => setShowInfoPopup(false)}
+              aria-label="Close information"
+            >
+              ✕
+            </button>
+            
+            <div className="popup-header">
+              <h3>Solar Wind Mission</h3>
+            </div>
+            
+            <div className="popup-body">
+              <p>
+                The solar wind is a continuous flow of charged particles from the Sun into space. 
+                These particles can affect various systems on Earth:
+              </p>
               
-              <div className="popup-header">
-                <h3>🌞 الرياح الشمسية</h3>
-              </div>
-              
-              <div className="popup-content">
-                <p>
-                  الرياح الشمسية هي تدفق مستمر للجسيمات المشحونة من الشمس 
-                  إلى الفضاء. هذه الجسيمات يمكن أن تؤثر على:
-                </p>
-                
+              <div className="popup-features-list">
                 <ul>
-                  <li>✅ الأقمار الصناعية والاتصالات</li>
-                  <li>✅ شبكات الكهرباء والطاقة</li>
-                  <li>✅ رواد الفضاء والمعدات الفضائية</li>
-                  <li>✅ أنظمة الملاحة والGPS</li>
+                  <li>Satellites and communications systems</li>
+                  <li>Power grids and energy infrastructure</li>
+                  <li>Astronauts and space equipment</li>
+                  <li>Navigation and GPS systems</li>
                 </ul>
+              </div>
 
-                <div className="popup-particle-info">
-                  <div className="popup-info-item dangerous">
-                    <span>⚡</span>
-                    <div>
-                      <strong>جسيمات خطرة</strong>
-                      <br/>
-                      <small>+10 نقاط عند النقر</small>
-                      <br/>
-                      <small>-15 صحة إذا وصلت الأرض</small>
-                    </div>
+              <div className="particle-types-grid">
+                <div className="particle-type-card dangerous">
+                  <div className="particle-icon">⚡</div>
+                  <div className="particle-info">
+                    <strong>Dangerous Particles</strong>
+                    <small>+10 points when clicked • -15 health if they reach Earth</small>
                   </div>
-                  <div className="popup-info-item safe">
-                    <span>✨</span> 
-                    <div>
-                      <strong>جسيمات آمنة</strong>
-                      <br/>
-                      <small>-5 نقاط عند النقر</small>
-                      <br/>
-                      <small>لا ضرر إذا وصلت الأرض</small>
-                    </div>
+                </div>
+                
+                <div className="particle-type-card safe">
+                  <div className="particle-icon">✨</div>
+                  <div className="particle-info">
+                    <strong>Safe Particles</strong>
+                    <small>-5 points when clicked • No damage to Earth</small>
                   </div>
                 </div>
               </div>
+
+              <div style={{
+                background: 'rgba(255, 215, 0, 0.1)',
+                padding: '1rem',
+                borderRadius: '10px',
+                border: '1px solid rgba(255, 215, 0, 0.3)',
+                textAlign: 'center'
+              }}>
+                <strong style={{color: '#FFD700'}}>🎯 Mission Objective:</strong>
+                <p style={{color: '#e0e0e0', margin: '0.5rem 0 0 0', fontSize: '0.95rem'}}>
+                  Protect Earth by clicking dangerous particles while avoiding safe ones!
+                </p>
+              </div>
             </div>
           </div>
-        </>
+        </div>
       )}
 
       {/* الخلفية الكونية */}
       <div className="space-background">
-        <div className="sun" title="الشمس - مصدر الرياح الشمسية">☀️</div>
-        <div className={`earth ${earthHealth < 30 ? 'danger' : ''}`} title="الأرض - تحتاج لحمايتك!">🌍</div>
+        <div className="sun" title="The Sun - source of solar wind">☀️</div>
+        <div className={`earth ${earthHealth < 30 ? 'danger' : ''}`} title="Earth - needs your protection!">🌍</div>
         
         {/* الجسيمات */}
         {particles.map(particle => (
@@ -248,7 +253,7 @@ const SolarWindGame = () => {
       <div className="game-ui">
         <div className="stats">
           <div className="health-bar">
-            <span className="health-label">صحة الأرض: {earthHealth}%</span>
+            <span className="health-label">Earth's Health: {earthHealth}%</span>
             <div className="health-track">
               <div 
                 className="health-fill"
@@ -263,56 +268,56 @@ const SolarWindGame = () => {
           </div>
           
           <div className="score-display">
-            <div className="current-score">النقاط: {score} ⭐</div>
-            <div className="high-score">أعلى نقاط: {highScore} 🏆</div>
+            <div className="current-score">Score: {score} ⭐</div>
+            <div className="high-score">High Score: {highScore} 🏆</div>
           </div>
         </div>
 
         {!gameStarted ? (
           <div className="start-screen">
-            <h2>🌞 مهمة الرياح الشمسية</h2>
-            <p>احمي الأرض من الجسيمات الشمسية الخطرة!</p>
+            <h2>🌞 Solar Wind Mission</h2>
+            <p>Protect Earth from dangerous solar particles!</p>
             <div className="game-rules">
-              <p>🎯 <strong>قواعد اللعبة:</strong></p>
-              <p>⚡ <strong>الجسيمات الحمراء:</strong> انقري عليها لتحصلي على +10 نقاط</p>
-              <p>✨ <strong>الجسيمات الصفراء:</strong> لا تنقري عليها أو ستخسرين -5 نقاط</p>
-              <p>💥 <strong>إذا وصلت الجسيمات الحمراء للأرض:</strong> -15 صحة</p>
-              <p>🏆 <strong>الهدف:</strong> تحقيق أعلى نقاط قبل تدمير الأرض!</p>
+              <p>🎯 <strong>Game Rules:</strong></p>
+              <p>⚡ <strong>Red Particles:</strong> Click to get +10 points</p>
+              <p>✨ <strong>Yellow Particles:</strong> Avoid clicking (-5 points)</p>
+              <p>💥 <strong>Dangerous particles hit Earth:</strong> -15 health</p>
+              <p>🏆 <strong>Goal:</strong> Highest score before Earth is destroyed!</p>
             </div>
             <button className="start-button" onClick={startGame}>
-              🚀 ابدأ المهمة
+              🚀 Start Mission
             </button>
           </div>
         ) : (
           <div className="instructions">
-            ⚡ انقري على الجسيمات <span style={{color: '#ff4444'}}>الحمراء</span> فقط!
+            ⚡ Click red particles only!
             <br/>
-            ✨ ابتعدي عن الجسيمات <span style={{color: '#ffd700'}}>الصفراء</span>
+            ✨ Avoid yellow particles
             {earthHealth < 50 && (
               <div style={{color: '#ff4444', marginTop: '0.5rem', fontWeight: 'bold'}}>
-                ⚠️ تحذير: صحة الأرض منخفضة!
+                ⚠️ Warning: Earth's health is low!
               </div>
             )}
           </div>
         )}
 
-        {/* شاشة Game Over Popup */}
+        {/* شاشة Game Over */}
         {gameOver && (
           <div className="game-over-overlay">
             <div className="game-over-container">
-              <h2 className="game-over-title">💥 انتهت اللعبة!</h2>
+              <h2 className="game-over-title">💥 Mission Failed!</h2>
               
               <div className="final-stats-compact">
-                <p>النقاط النهائية: <strong>{score}</strong> ⭐</p>
-                <p>أعلى نقاط: <strong>{highScore}</strong> 🏆</p>
+                <p>Final Score: <strong>{score}</strong> ⭐</p>
+                <p>High Score: <strong>{highScore}</strong> 🏆</p>
                 {score === highScore && score > 0 && (
-                  <p className="new-record-compact">🎉 سجل جديد! أحسنت!</p>
+                  <p className="new-record-compact">🎉 New Record! Excellent!</p>
                 )}
               </div>
               
               <div className="game-over-buttons-compact">
-                <button onClick={restartGame}>🔄 حاولي مرة أخرى</button>
-                <button onClick={() => navigate('/')}>🏠 القائمة الرئيسية</button>
+                <button onClick={restartGame}>🔄 Try Again</button>
+                <button onClick={() => navigate('/')}>🏠 Main Menu</button>
               </div>
             </div>
           </div>

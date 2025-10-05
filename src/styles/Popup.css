@@ -1,0 +1,104 @@
+/* styles/Popup.css */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.popup-content {
+  background: linear-gradient(135deg, #1a237e, #311b92);
+  color: white;
+  padding: 2rem;
+  border-radius: 20px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  position: relative;
+  animation: slideUp 0.3s ease-out;
+  border: 2px solid #7c4dff;
+}
+
+.popup-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+}
+
+.popup-close:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.popup-content h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+  color: #ffeb3b;
+}
+
+.popup-body, .popup-features {
+  margin: 1.5rem 0;
+}
+
+.popup-features h3 {
+  color: #7c4dff;
+  margin-bottom: 0.5rem;
+}
+
+.popup-features ul {
+  list-style: none;
+  padding-left: 1rem;
+}
+
+.popup-features li {
+  padding: 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.popup-age {
+  text-align: center;
+  font-weight: bold;
+  color: #ffeb3b;
+  margin-top: 1.5rem;
+}
+
+.popup-footer { text-align: center; }
+
+.popup-start-btn {
+  background: linear-gradient(135deg, #ff4081, #f50057);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 4px 15px rgba(245, 0, 87, 0.4);
+}
+
+.popup-start-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(245, 0, 87, 0.6);
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
